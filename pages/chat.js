@@ -1,29 +1,53 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import appConfig from "../config.json";
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzMyNDkzMywiZXhwIjoxOTU4OTAwOTMzfQ.L3oeYCXvl5SFJI362AybIjIsCxxbhylFCfeSkbcKfnA";
+const BASE_URL = "https://zjjdyrcszbvrpiznxgtm.supabase.co";
+const supabaseClient = createClient(BASE_URL, SUPABASE_KEY);
 
 export default function ChatPage() {
   // Sua lógica vai aqui
   const [mensagem, setMensagem] = useState("");
-  const [listaDeMensagem, setListaMensagem] = useState([]);
+  const [listaDeMensagem, setListaDeMensagem] = useState([]);
+
+  useEffect(() => {
+    supabaseClient
+      .from("mensagens")
+      .select("*")
+      .order('id', {ascending: false})
+      .then(({ data }) => {
+        setListaDeMensagem(data);
+      });
+  }, []);
 
   const handleNovaMensagem = (novaMensagem) => {
     if (novaMensagem.trim() === "") return null;
 
     const mensagemCompleta = {
-      id: listaDeMensagem.length + 1,
+      //id: listaDeMensagem.length + 1,
       de: "GustavoCarv",
       texto: novaMensagem,
     };
-    setListaMensagem([ mensagemCompleta, ...listaDeMensagem]);
+
+    supabaseClient
+      .from("mensagens")
+      .insert(mensagemCompleta) // tem que ser um insert com os mesmos campos do banco
+      .then(({ data }) => {
+        setListaDeMensagem([data[0], ...listaDeMensagem]);
+      });
   };
 
   const handleApagarMensagem = (id) => {
-      setListaMensagem(listaDeMensagem.filter((mensagem) => {
-          return mensagem.id !== id;
-        })); 
-    }
-  
+    setListaDeMensagem(
+      listaDeMensagem.filter((mensagem) => {
+        return mensagem.id !== id;
+      })
+    );
+  };
+
   // ./Sua lógica vai aqui
   return (
     <Box
@@ -66,7 +90,10 @@ export default function ChatPage() {
             padding: "16px",
           }}
         >
-          <MessageList mensagens={listaDeMensagem} handleApagarMensagem={handleApagarMensagem} />
+          <MessageList
+            mensagens={listaDeMensagem}
+            handleApagarMensagem={handleApagarMensagem}
+          />
 
           <Box
             as="form"
@@ -133,7 +160,6 @@ function Header() {
 function MessageList(props) {
   return (
     <Box
-      
       tag="ul"
       styleSheet={{
         overflow: "scroll",
@@ -145,16 +171,13 @@ function MessageList(props) {
       }}
     >
       {props.mensagens.map((mensagem) => {
-        console.log(mensagem)
         return (
-            
           <Text
-            
             key={mensagem.id}
             tag="li"
             styleSheet={{
               borderRadius: "5px",
-              position: 'relative',
+              position: "relative",
               padding: "6px",
               marginBottom: "12px",
               hover: {
@@ -190,17 +213,19 @@ function MessageList(props) {
               </Text>
             </Box>
             {mensagem.texto}
-            <Button  iconName="FaTrash" onClick={ (id) => {props.handleApagarMensagem(mensagem.id) } } 
-            styleSheet={{
+            <Button
+              iconName="FaTrash"
+              onClick={(id) => {
+                props.handleApagarMensagem(mensagem.id);
+              }}
+              styleSheet={{
                 position: "absolute",
                 right: "5px",
                 top: "0",
                 color: appConfig.theme.colors.neutrals[300],
                 backgroundColor: appConfig.theme.colors.neutrals[700],
-            }}
-            
+              }}
             />
-           
           </Text>
         );
       })}

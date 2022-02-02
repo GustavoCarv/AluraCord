@@ -51,7 +51,7 @@ export default function PaginaInicial() {
             width: '100%', maxWidth: '700px',
             borderRadius: '10px', padding: '32px', margin: '16px',
             boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-            backgroundColor: "rgba( 255, 255, 255, 0.25 )",
+            backgroundColor: "rgba( 255, 255, 255, 0.5 )",
             backdropFilter: 'blur( 5.5px )',
           }}
         >
@@ -59,7 +59,7 @@ export default function PaginaInicial() {
           <Box
             onSubmit={(e) => {
               e.preventDefault();
-              route.push('/chat', { username });                          
+              route.push(`/chat?username=${username}`);                          
             }}
             as="form"
             styleSheet={{
@@ -68,7 +68,7 @@ export default function PaginaInicial() {
             }}
           >
             <Titulo tag="h2">Boas vindas de volta!</Titulo>
-            <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
+            <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[100] }}>
               {appConfig.name}
             </Text>
 
